@@ -1,0 +1,9 @@
+<component name="libraryTable">
+  <library name="jdom">
+    <CLASSES>
+      <root url="jar://$USER_HOME$/Documents/work_files/财付通即时到帐中介担保双接口/测试例子(可直接运行,测试前需先在tenpay_config文件上配置您的商户号，商家密钥，回调地址)/java/jsp/tenpay_api_b2c/WEB-INF/lib/jdom.jar!/" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+  </library>
+</component>
