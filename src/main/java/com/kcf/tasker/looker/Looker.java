@@ -100,6 +100,7 @@ public abstract class Looker<T> extends Observable implements Runnable {
         return table;
     }
 
+    /** get the T`s class name as table name */
     private String getEntityClassName() {
         ParameterizedType pt = (ParameterizedType)this.getClass().getGenericSuperclass();
         Class<T> tClazz = (Class<T>) pt.getActualTypeArguments()[0];
