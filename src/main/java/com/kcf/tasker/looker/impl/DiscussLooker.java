@@ -23,7 +23,7 @@ public class DiscussLooker extends Looker<Discuss> {
 
     public DiscussLooker(long delay, Client client) {
         super(delay, client);
-        super.addObserver(new DiscussUpdater());
+        super.addObserver(new DiscussUpdater(client));
     }
 
     @Override

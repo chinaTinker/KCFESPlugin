@@ -41,4 +41,8 @@ public class RiverConfig {
     /** update info configs */
     final public static String UPDATE_INDEX = "kcf_river";
     final public static String UPDATE_TYPE  = "river_table";
+
+    /** the es index name */
+    final public static String KCF_INDEX = "kcf-jdbc-index";
+
 }

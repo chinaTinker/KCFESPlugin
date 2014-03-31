@@ -2,10 +2,9 @@ package com.kcf.tasker.updater.impl;
 
 import com.kcf.entity.Discuss;
 import com.kcf.tasker.updater.Updater;
+import org.elasticsearch.client.Client;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
-
-import java.util.List;
 
 /**
  * Created with IntelliJ IDEA.
@@ -16,14 +15,23 @@ import java.util.List;
 public class DiscussUpdater extends Updater<Discuss> {
     private static final ESLogger logger = ESLoggerFactory.getLogger("DiscussUpdater");
 
+    public DiscussUpdater(Client client){
+        super(client);
+    }
+
     @Override
-    protected void dealData(Object obj) {
-        if(obj instanceof List){
-            List<Discuss> discusses = (List<Discuss>) obj;
+    protected String builderJson(Discuss disc){
+        //TODO
+        return  null;
+    }
 
-            logger.info("There commes {} records", discusses.size());
+    @Override
+    protected String getESType() {
+        return "Consult";
+    }
 
-            //TODO
-        }
+    @Override
+    protected String getCurrentId(Discuss discuss) {
+        return String.valueOf(discuss.getId());
     }
 }
