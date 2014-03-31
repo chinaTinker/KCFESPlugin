@@ -26,10 +26,8 @@
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-grouping:4.4.0" level="project" />
     <orderEntry type="library" name="Maven: org.apache.lucene:lucene-spatial:4.4.0" level="project" />
     <orderEntry type="library" name="Maven: com.spatial4j:spatial4j:0.3" level="project" />
-    <orderEntry type="library" name="Maven: com.alibaba:fastjson:1.1.24" level="project" />
     <orderEntry type="library" scope="TEST" name="Maven: junit:junit:4.8.1" level="project" />
-    <orderEntry type="library" name="Maven: org.ansj:ansj_seg:0.9" level="project" />
-    <orderEntry type="library" name="Maven: org.ansj:tree_split:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: mysql:mysql-connector-java:5.1.29" level="project" />
   </component>
 </module>
 

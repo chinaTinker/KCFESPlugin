@@ -1,5 +1,8 @@
 package com.kcf.entity;
 
+import org.elasticsearch.common.joda.time.DateTime;
+
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -15,17 +18,21 @@ public class Discuss {
     private String subject;
     private String content;
     private long condId;
-    private long lastReplied;
-    private long created;
-    private long updated;
+    private DateTime lastReplied;
+    private DateTime created;
+    private DateTime updated;
     private List<String> replie;
 
-    public long getLastReplied() {
+    public DateTime getLastReplied() {
         return lastReplied;
     }
 
-    public void setLastReplied(long lastReplied) {
+    public void setLastReplied(DateTime lastReplied) {
         this.lastReplied = lastReplied;
+    }
+    public void setLastReplied(Timestamp lastReplied) {
+
+        this.lastReplied = new DateTime(lastReplied.getTime());
     }
 
     public long getId() {
@@ -60,19 +67,25 @@ public class Discuss {
         this.condId = condId;
     }
 
-    public long getCreated() {
+    public DateTime getCreated() {
         return created;
     }
 
-    public void setCreated(long created) {
+    public void setCreated(DateTime created) {
         this.created = created;
     }
+    public void setCreated(Timestamp created){
+        this.created = new DateTime(created.getTime());
+    }
 
-    public long getUpdated() {
+    public DateTime getUpdated() {
         return updated;
     }
 
-    public void setUpdated(long updated) {
+    public void setUpdated(Timestamp updated) {
+        this.updated = new DateTime(updated.getTime());
+    }
+    public void setUpdated(DateTime updated) {
         this.updated = updated;
     }
 

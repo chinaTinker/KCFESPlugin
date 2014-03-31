@@ -21,7 +21,7 @@ public class DiscussUpdater extends Updater<Discuss> {
         if(obj instanceof List){
             List<Discuss> discusses = (List<Discuss>) obj;
 
-            logger.info("There commes {} records: \n{}\n", discusses.size(), discusses);
+            logger.info("There commes {} records", discusses.size());
 
             //TODO
         }

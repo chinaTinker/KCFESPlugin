@@ -2,6 +2,7 @@ package org.elasticsearch.river;
 
 import com.kcf.tasker.looker.Looker;
 import com.kcf.tasker.looker.Lookers;
+import com.kcf.util.DBHelper;
 import com.kcf.util.RiverConfig;
 import com.kcf.util.RiverConfig.Tables;
 import org.elasticsearch.client.Client;
@@ -24,6 +25,8 @@ import java.util.Map;
 public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River{
     private SettingInfo settingInfo = null;
 
+    private Client client;
+
     private Map<String, Thread> threads = Maps.newHashMap();
 
     @Inject
@@ -31,11 +34,12 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
                                @RiverIndexName String riverIndexName, Client client) {
         super(riverName, settings);
 
+        this.client = client;
         this.settingInfo = this.wrapSetting(this.getSourceSettings(settings));
 
         logger.info("get the custom config info: {}", this.settingInfo);
 
-        //TODO some db initials operations
+        DBHelper.init(this.settingInfo.url, this.settingInfo.user, this.settingInfo.pwd);
     }
 
     @Override
@@ -44,7 +48,8 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
 
         for(Tables table : Tables.values()){
             String name = table.name();
-            Looker crrLooker = Lookers.getLooker(name, this.settingInfo.delay);
+            Looker crrLooker = Lookers.getLooker(
+                    name, this.settingInfo.delay, this.client);
 
             logger.info("the {} looker fired", name);
 
@@ -124,38 +129,6 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
             this.url = url;
             this.user = user;
             this.pwd = pwd;
-            this.delay = delay;
-        }
-
-        public String getUrl() {
-            return url;
-        }
-
-        public void setUrl(String url) {
-            this.url = url;
-        }
-
-        public String getUser() {
-            return user;
-        }
-
-        public void setUser(String user) {
-            this.user = user;
-        }
-
-        public String getPwd() {
-            return pwd;
-        }
-
-        public void setPwd(String pwd) {
-            this.pwd = pwd;
-        }
-
-        public long getDelay() {
-            return delay;
-        }
-
-        public void setDelay(long delay) {
             this.delay = delay;
         }
 
