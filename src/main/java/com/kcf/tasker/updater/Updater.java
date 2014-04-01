@@ -2,6 +2,7 @@ package com.kcf.tasker.updater;
 
 import com.kcf.tasker.looker.Looker;
 import com.kcf.util.RiverConfig;
+import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
@@ -22,7 +23,7 @@ public abstract class Updater<T> implements Observer {
 
     final private static String INDEX = RiverConfig.KCF_INDEX;
 
-    private String table = this.getEntityClassName();
+    protected String table = this.getEntityClassName();
     private Client client;
 
     protected Updater(Client client) {
@@ -67,9 +68,19 @@ public abstract class Updater<T> implements Observer {
 
     /** fire the json to es search */
     protected void upload(String json, String id){
-        client.prepareIndex(INDEX, getESType(), id)
+        String crrType = getESType();
+
+        IndexResponse resp =  client.prepareIndex(INDEX, crrType, id)
               .setSource(json)
-              .execute();
+              .execute()
+              .actionGet();
+
+        if(resp != null){
+            logger.info("set index successfully {}, {}, {}",
+                    resp.getIndex(), resp.getId(), resp.getType());
+        }else {
+            logger.info("set index failed: {}, {}", crrType, id);
+        }
 
     }
 

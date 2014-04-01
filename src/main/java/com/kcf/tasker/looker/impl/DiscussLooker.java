@@ -48,9 +48,15 @@ public class DiscussLooker extends Looker<Discuss> {
                 disc.setId(rs.getLong("id"));
                 disc.setSubject(rs.getString("subject"));
                 disc.setContent(rs.getString("content"));
+                disc.setBookId(rs.getLong("bookId"));
                 disc.setCreated(rs.getTimestamp("created"));
                 disc.setUpdated(rs.getTimestamp("updated"));
                 disc.setLastReplied(rs.getTimestamp("lastReplied"));
+                disc.setConditionName(rs.getString("name"));
+                disc.setViewCount(rs.getInt("viewCount"));
+                disc.setReplyCount(rs.getInt("commentCount"));
+                disc.setTopped(rs.getBoolean("topped"));
+                disc.setUserId(rs.getLong("userBaseId"));
 
                 data.add(disc);
             }
@@ -63,8 +69,10 @@ public class DiscussLooker extends Looker<Discuss> {
 
     @Override
     protected String getSql() {
-        return "select id, subject, content, updated, created, lastReplied" +
-                " from DiscussTopic " +
-                " where updated > ?";
+        return  " select dt.id, dt.subject, dt.content, dt.bookId, " +
+                " dt.updated, dt.created, dt.lastReplied, c.name, " +
+                " dt.viewCount, dt.commentCount, dt.topped, dt.userBaseId " +
+                " from DiscussTopic dt, `Condition` c" +
+                " where dt.conditionId = c.id and dt.updated > ?";
     }
 }

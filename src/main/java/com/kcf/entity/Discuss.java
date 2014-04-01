@@ -14,14 +14,19 @@ import java.util.List;
  * discuss entity
  */
 public class Discuss {
-    private long id;
+    private Long id;
     private String subject;
     private String content;
-    private long condId;
+    private String conditionName;
+    private Long bookId;
+    private Long userId;
+    private int viewCount;
+    private int replyCount;
     private DateTime lastReplied;
     private DateTime created;
     private DateTime updated;
     private List<String> replie;
+    private boolean topped;
 
     public DateTime getLastReplied() {
         return lastReplied;
@@ -59,14 +64,6 @@ public class Discuss {
         this.content = content;
     }
 
-    public long getCondId() {
-        return condId;
-    }
-
-    public void setCondId(long condId) {
-        this.condId = condId;
-    }
-
     public DateTime getCreated() {
         return created;
     }
@@ -97,12 +94,62 @@ public class Discuss {
         this.replie = replie;
     }
 
+    public String getConditionName() {
+        return conditionName;
+    }
+
+    public void setConditionName(String conditionName) {
+        this.conditionName = conditionName;
+    }
+
+    public Long getBookId() {
+        return bookId;
+    }
+
+    public void setBookId(Long bookId) {
+        this.bookId = bookId;
+    }
+
+    public int getViewCount() {
+        return viewCount;
+    }
+
+    public void setViewCount(int viewCount) {
+        this.viewCount = viewCount;
+    }
+
+    public int getReplyCount() {
+        return replyCount;
+    }
+
+    public void setReplyCount(int replyCount) {
+        this.replyCount = replyCount;
+    }
+
+    public boolean isTopped() {
+        return topped;
+    }
+
+    public void setTopped(boolean topped) {
+        this.topped = topped;
+    }
+
+    public Long getUserId() {
+        return userId;
+    }
+
+    public void setUserId(Long userId) {
+        this.userId = userId;
+    }
+
     @Override
     public String toString() {
         StringBuilder sb = new StringBuilder();
         sb.append("id:      ").append(this.id).append("\n");
+        sb.append("bookId:  ").append(this.bookId).append("\n");
         sb.append("subject: ").append(this.subject).append("\n");
         sb.append("content: ").append(this.content).append("\n");
+        sb.append("conditionName: ").append(this.conditionName).append("\n");
 
         return sb.toString();
     }

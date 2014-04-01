@@ -101,6 +101,9 @@ public abstract class Looker<T> extends Observable implements Runnable {
 
                 ResultSet rs = st.executeQuery();
                 data.addAll(this.parseRow(rs));
+
+                st.close();
+                rs.close();
             }
 
         } catch (SQLException e) {
