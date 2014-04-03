@@ -36,13 +36,13 @@ public class TestDiscussLooker {
         System.out.println("test discuss looker data query");
 
         Looker looker  = Lookers.getDiscussLooker(1000, null);
+
         try {
             Method method = Looker.class.getDeclaredMethod("lookData", null);
             method.setAccessible(true);
             List<Discuss> discusses = (List<Discuss>) method.invoke(looker);
 
             assert discusses != null;
-            assert !discusses.isEmpty();
 
         } catch (NoSuchMethodException e) {
             e.printStackTrace();

@@ -13,7 +13,6 @@ import java.sql.*;
 import java.util.List;
 
 /**
- * Created with IntelliJ IDEA.
  * User: 老牛 -- TK
  * Date: 14-3-27
  * Time: 下午5:38

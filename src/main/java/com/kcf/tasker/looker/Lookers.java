@@ -4,6 +4,10 @@ package com.kcf.tasker.looker;
 import com.kcf.tasker.looker.impl.DiscussLooker;
 import com.kcf.util.RiverConfig.Tables;
 import org.elasticsearch.client.Client;
+import org.elasticsearch.common.logging.ESLogger;
+import org.elasticsearch.common.logging.ESLoggerFactory;
+import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.util.concurrent.EsExecutors;
 
 /**
  * Created with IntelliJ IDEA.
@@ -14,6 +18,7 @@ import org.elasticsearch.client.Client;
  * Looker helper class, as a factory
  */
 public class Lookers {
+    private static final ESLogger logger = ESLoggerFactory.getLogger("Lookers");
 
     /**
      * looker factory method
@@ -37,4 +42,5 @@ public class Lookers {
 
         return new DiscussLooker(delay, client);
     }
+
 }

@@ -1,13 +1,12 @@
 package com.kcf.repo;
 
 import com.kcf.util.DBHelper;
+import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 
-import java.sql.Connection;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
+import java.sql.*;
+import java.util.Collection;
 
 /**
  * User: 老牛 -- TK
@@ -54,5 +53,37 @@ public class DiscussRepo {
         }
 
         return result;
+    }
+
+    /**
+     * get the all ids in db
+     * @return
+     */
+    public Collection<Long> getAllIds(){
+        Collection<Long> ids = Lists.newArrayList();
+
+        String sql = "select id from DiscussTopic";
+
+        Connection conn = DBHelper.getConnection();
+        try {
+            Statement pst = conn.createStatement();
+            ResultSet rs = pst.executeQuery(sql);
+
+            while(rs.next()){
+                Long crrId = rs.getLong("id");
+                if(crrId != null && crrId > 0){
+                    ids.add(crrId);
+                }
+            }
+
+            pst.close();
+            rs.close();
+        } catch (SQLException e) {
+            e.printStackTrace();
+        } finally {
+            DBHelper.close(conn);
+        }
+
+        return ids;
     }
 }

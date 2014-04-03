@@ -3,6 +3,7 @@ package com.kcf.util;
 import org.elasticsearch.common.collect.Lists;
 import org.elasticsearch.common.joda.time.DateTime;
 
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -31,7 +32,7 @@ public class RiverConfig {
     final public static long DEFAULT_DELAY = 10 * 60 * 1000;
 
     /** the start time to check the data */
-    final public static DateTime DEFAULT_START_TIME = new DateTime(2014, 2, 2, 2, 2);
+    final public static DateTime DEFAULT_START_TIME = DateTime.now();
 
     /** the tables need to be looked */
     public static enum Tables{

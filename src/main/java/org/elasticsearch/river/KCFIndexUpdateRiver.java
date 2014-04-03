@@ -1,14 +1,18 @@
 package org.elasticsearch.river;
 
+import com.kcf.tasker.deleter.Deleter;
+import com.kcf.tasker.deleter.Deleters;
 import com.kcf.tasker.looker.Looker;
 import com.kcf.tasker.looker.Lookers;
 import com.kcf.util.DBHelper;
 import com.kcf.util.RiverConfig;
 import com.kcf.util.RiverConfig.Tables;
+import com.kcf.util.ThreadContext;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.collect.Maps;
 import org.elasticsearch.common.inject.Inject;
 import org.elasticsearch.common.util.concurrent.EsExecutors;
+import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.support.XContentMapValues;
 
 import java.util.Map;
@@ -26,8 +30,6 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
     private SettingInfo settingInfo = null;
 
     private Client client;
-
-    private Map<String, Thread> threads = Maps.newHashMap();
 
     @Inject
     public KCFIndexUpdateRiver(RiverName riverName, RiverSettings settings,
@@ -48,21 +50,9 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
 
         for(Tables table : Tables.values()){
             String name = table.name();
-            Looker crrLooker = Lookers.getLooker(
-                    name, this.settingInfo.delay, this.client);
 
-            logger.info("the {} looker fired", name);
-
-            String threadPrefix = "kcf-index-update-river[" + name + "]";
-
-            Thread crrThread = EsExecutors.daemonThreadFactory(
-                 settings.globalSettings(),
-                 threadPrefix
-            ).newThread(crrLooker);
-
-            this.cacheThread(threadPrefix, crrThread);
-
-            crrThread.start();
+            this.runLooker(name);
+            this.runDeleter(name);
         }
     }
 
@@ -70,28 +60,31 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
     public void close() {
         logger.info("close the kcf-index-update river");
 
-        for(String threadName : this.threads.keySet()){
-            logger.info("to stop the thread: {}", threadName);
-
-            this.threads.remove(threadName).interrupt();
-        }
+        ThreadContext.close();
     }
 
-    /**
-     * cache the thread
-     * if there is a old thread instance in cache,
-     * close it and add the new one
-     *
-     * @param key     thread name
-     * @param thread  new thread instance
-     */
-    private void cacheThread(String key, Thread thread){
-        Thread oldThread = this.threads.get(key);
-        if(oldThread != null){
-            oldThread.interrupt();
-        }
+    /** start to run a look task */
+    private void runLooker(String name){
+        Looker crrLooker = Lookers.getLooker(
+                name, this.settingInfo.delay, this.client);
 
-        this.threads.put(key, thread);
+        logger.info("the {} looker fired", name);
+
+        String threadPrefix = "kcf-river-looker[" + name + "]";
+
+        ThreadContext.run(crrLooker, threadPrefix, settings.globalSettings());
+    }
+
+    /** start to run a delete task */
+    private void runDeleter(String name){
+        Deleter crrDeleter = Deleters.getDeleter(
+                name, this.settingInfo.delay, this.client);
+
+        logger.info("running a deleter checker {}", name);
+
+        String threadPrefix = "kcf-river-deleter[" + name + "]";
+
+        ThreadContext.run(crrDeleter, threadPrefix, settings.globalSettings());
     }
 
     private Map<String, Object> getSourceSettings(RiverSettings settings){
