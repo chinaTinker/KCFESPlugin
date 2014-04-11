@@ -47,6 +47,7 @@ public class DiscussUpdater extends Updater<Discuss> {
             builder.field("conditions",    disc.getConditionName());
             builder.field("crrHospital",   hospitalRepo.getHospitals(disc.getBookId()));
             builder.field("datetime",      disc.getCreated().toString("yyyy-MM-dd HH:mm:ss"));
+            builder.field("timestamp", disc.getCreated().getMillis());
             builder.field("description",   disc.getContent());
             builder.field("discussId",     disc.getId());
             builder.field("helps",         book != null? book.getQuestion() : null);
@@ -59,6 +60,7 @@ public class DiscussUpdater extends Updater<Discuss> {
             builder.field("replies",       discussRepo.getReplies(disc.getId()));
             builder.field("replyCount",    disc.getReplyCount());
             builder.field("lastReplyTime", disc.getLastReplied().toString("yyyy-MM-dd Hh:mm:ss"));
+            builder.field("lastReplyTimestamp", disc.getLastReplied().getMillis());
             builder.field("title",         disc.getSubject());
             builder.field("viewCount",     disc.getViewCount());
             builder.field("topped",        disc.isTopped()? 1 : 0);
