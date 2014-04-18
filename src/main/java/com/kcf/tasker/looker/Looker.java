@@ -1,5 +1,6 @@
 package com.kcf.tasker.looker;
 
+import com.kcf.tasker.updater.Updaters;
 import com.kcf.util.DBHelper;
 import com.kcf.util.RiverConfig;
 import org.elasticsearch.action.get.GetResponse;
@@ -11,6 +12,9 @@ import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -33,7 +37,7 @@ import java.util.Observable;
  * If it find some newest record, get them, and
  * send to Updater for some logical operation
  */
-public abstract class Looker<T> extends Observable implements Runnable {
+public abstract class Looker<T> extends Observable implements Job {
     private static final ESLogger logger = ESLoggerFactory.getLogger("Looker");
 
     /** ES client instance */
@@ -42,44 +46,43 @@ public abstract class Looker<T> extends Observable implements Runnable {
     /** to looked table name */
     private String table;
 
-    /** every loop delay time in millisecond */
-    private long delay = 10 * 60 * 1000;
-
     /** keep the last updated timestamp */
     protected DateTime lastUpdateTimeStamp = RiverConfig.DEFAULT_START_TIME;
 
-
-    public Looker(long delay, Client client){
-        this.delay = delay;
-        this.client = client;
+    protected Looker(){
         this.table = this.getEntityClassName();
     }
 
+    protected Looker(Client client){
+        this();
+        this.client = client;
+    }
+
     @Override
-    public void run() {
-        logger.info("DB Looker[{}] fired ...", this.table);
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        Client client = (Client) jobExecutionContext.getJobDetail().getJobDataMap().get("client");
+        if(client != null) {
+            this.client = client;
+            super.addObserver(Updaters.getUpdater(this.table, this.client));
+        }
 
         this.recoverFromSavedUpdateInfo();
+        this.fire();
+    }
 
-        boolean isRunning = true;
+    /**
+     * main looker method
+     */
+    protected void fire() {
+        List<T> data = this.lookData();
+        if(data != null && !data.isEmpty()){
+            logger.debug("DB Looker[{}] got {} record", this.table, data.size());
 
-        while (isRunning) {
-            try {
-                List<T> data = this.lookData();
-                if(data != null && !data.isEmpty()){
-                    logger.debug("DB Looker[{}] got {} record", this.table, data.size());
-
-                    this.lastUpdateTimeStamp = this.getLastUpdateTimeStamp(data);
-                    this.saveUpdateInfo();
-                    this.notify(data);
-                }
-
-                Thread.sleep(this.delay);
-            } catch (InterruptedException e) {
-                logger.warn("Looker[{}], interrupted --> it will close", this.table, e);
-                isRunning = false;
-            }
+            this.lastUpdateTimeStamp = this.getLastUpdateTimeStamp(data);
+            this.saveUpdateInfo();
+            this.notify(data);
         }
+
     }
 
     /** get data from db */
@@ -89,7 +92,7 @@ public abstract class Looker<T> extends Observable implements Runnable {
 
         Connection conn = null;
         try {
-            logger.info("check {} start from {}", this.table, this.lastUpdateTimeStamp);
+            logger.debug("check {} start from {}", this.table, this.lastUpdateTimeStamp);
 
             Timestamp timestamp = new Timestamp(this.lastUpdateTimeStamp.getMillis());
 
@@ -133,7 +136,6 @@ public abstract class Looker<T> extends Observable implements Runnable {
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             builder.field("table", this.table);
-            builder.field("delay", this.delay);
             builder.field("lastUpdateTimestamp",
                     this.lastUpdateTimeStamp.toString("yyyy-MM-dd HH:mm:ss"));
             builder.endObject();
@@ -148,8 +150,6 @@ public abstract class Looker<T> extends Observable implements Runnable {
         } catch (IOException e) {
             logger.error("save updateInfo[{}] failed", e, this.table);
         }
-
-
     }
 
     /**
@@ -178,13 +178,12 @@ public abstract class Looker<T> extends Observable implements Runnable {
                     DateTimeFormat.forPattern("yyyy-MM-dd HH:mm:ss")
                 );
 
-                logger.info("recovered last update time: {}", lastUpdateTime);
+                logger.debug("recovered last update time: {}", lastUpdateTime);
             }else {
                 logger.warn("{} is not a String clazz, but {}",
                         key, lastUpdateTime.getClass());
             }
         }
-
     }
 
     /** notify the server that I got the data */

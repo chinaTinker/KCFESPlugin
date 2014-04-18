@@ -6,6 +6,7 @@ import org.elasticsearch.action.index.IndexResponse;
 import org.elasticsearch.client.Client;
 import org.elasticsearch.common.logging.ESLogger;
 import org.elasticsearch.common.logging.ESLoggerFactory;
+import org.quartz.Job;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.List;
@@ -18,7 +19,7 @@ import java.util.Observer;
  * Date: 14-3-27
  * Time: 下午6:07
  */
-public abstract class Updater<T> implements Observer {
+public abstract class Updater<T> implements Observer{
     private final static ESLogger logger = ESLoggerFactory.getLogger("Update");
 
     final private static String INDEX = RiverConfig.KCF_INDEX;

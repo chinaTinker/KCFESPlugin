@@ -20,9 +20,12 @@ import java.util.List;
 public class DiscussLooker extends Looker<Discuss> {
     private static ESLogger logger = ESLoggerFactory.getLogger("DiscussLooker");
 
-    public DiscussLooker(long delay, Client client) {
-        super(delay, client);
-        super.addObserver(new DiscussUpdater(client));
+    public DiscussLooker() {
+        super();
+    }
+
+    public DiscussLooker(Client client) {
+        super(client);
     }
 
     @Override

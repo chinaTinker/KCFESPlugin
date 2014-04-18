@@ -9,8 +9,12 @@ import org.elasticsearch.common.logging.ESLoggerFactory;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.quartz.Job;
+import org.quartz.JobExecutionContext;
+import org.quartz.JobExecutionException;
 
 import java.io.IOException;
+import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
 import java.util.List;
 
@@ -26,45 +30,41 @@ import java.util.List;
  *
  * Do the job in loop with a delay every time.
  */
-public abstract class Deleter implements Runnable{
+public abstract class Deleter<T> implements Job{
     private static final ESLogger logger = ESLoggerFactory.getLogger("Deleter");
 
-    /** delay time every loop as millis */
-    protected long delay = 10 * 60 * 1000;
     protected String table;
     protected Client client;
     protected long total;
 
-
-    protected Deleter(String table, Client client) {
-        this.table = table;
-        this.client = client;
+    protected Deleter(){
+        this.table = this.getEntityClassName();
     }
 
-    public Deleter(String table, long delay, Client client) {
-        this.table = table;
-        this.delay = delay;
+    protected Deleter(Client client) {
+        this();
         this.client = client;
     }
-
 
     @Override
-    public void run() {
-        boolean isRunning = true;
-        while(isRunning){
-            try {
-                Collection<Long> ids = this.getToDeleteIDs();
+    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException {
+        Client client = (Client) jobExecutionContext.getJobDetail().getJobDataMap().get("client");
+        if(client != null) this.client = client;
 
-                logger.info("there are {} {} records to delete", ids.size(), this.table);
+        this.fire();
+    }
 
-                for(Long id : ids){
-                    this.deleteFromEs(id);
-                }
+    /**
+     * the main logical method
+     */
+    protected void fire(){
+        Collection<Long> ids = this.getToDeleteIDs();
 
-                Thread.sleep(this.delay);
-            } catch (InterruptedException e) {
-                logger.error("check type {} failed", e, this.table);
-                isRunning = false;
+        if(!ids.isEmpty()) {
+            logger.info("there are {} {} records to delete", ids.size(), this.table);
+
+            for (Long id : ids) {
+                this.deleteFromEs(id);
             }
         }
     }
@@ -144,5 +144,14 @@ public abstract class Deleter implements Runnable{
     }
 
     protected abstract String getESType();
+
+    /** get the T`s class name as table name */
+    private String getEntityClassName() {
+        ParameterizedType pt =
+                (ParameterizedType)this.getClass().getGenericSuperclass();
+
+        Class<T> tClazz = (Class<T>) pt.getActualTypeArguments()[0];
+        return tClazz.getSimpleName();
+    }
 }
 

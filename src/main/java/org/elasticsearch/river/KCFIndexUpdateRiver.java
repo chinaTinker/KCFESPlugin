@@ -5,6 +5,7 @@ import com.kcf.tasker.deleter.Deleters;
 import com.kcf.tasker.looker.Looker;
 import com.kcf.tasker.looker.Lookers;
 import com.kcf.util.DBHelper;
+import com.kcf.util.QuartzContext;
 import com.kcf.util.RiverConfig;
 import com.kcf.util.RiverConfig.Tables;
 import com.kcf.util.ThreadContext;
@@ -42,6 +43,7 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
         logger.info("get the custom config info: {}", this.settingInfo);
 
         DBHelper.init(this.settingInfo.url, this.settingInfo.user, this.settingInfo.pwd);
+        QuartzContext.init(client, this.settingInfo.delay);
     }
 
     @Override
@@ -50,9 +52,8 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
 
         for(Tables table : Tables.values()){
             String name = table.name();
-
-            this.runLooker(name);
-            this.runDeleter(name);
+            QuartzContext.fire(Lookers.getLookerClazz(name));
+            QuartzContext.fire(Deleters.getDeleterClazz(name));
         }
     }
 
@@ -60,31 +61,7 @@ public class KCFIndexUpdateRiver extends AbstractRiverComponent implements River
     public void close() {
         logger.info("close the kcf-index-update river");
 
-        ThreadContext.close();
-    }
-
-    /** start to run a look task */
-    private void runLooker(String name){
-        Looker crrLooker = Lookers.getLooker(
-                name, this.settingInfo.delay, this.client);
-
-        logger.info("the {} looker fired", name);
-
-        String threadPrefix = "kcf-river-looker[" + name + "]";
-
-        ThreadContext.run(crrLooker, threadPrefix, settings.globalSettings());
-    }
-
-    /** start to run a delete task */
-    private void runDeleter(String name){
-        Deleter crrDeleter = Deleters.getDeleter(
-                name, this.settingInfo.delay, this.client);
-
-        logger.info("running a deleter checker {}", name);
-
-        String threadPrefix = "kcf-river-deleter[" + name + "]";
-
-        ThreadContext.run(crrDeleter, threadPrefix, settings.globalSettings());
+        QuartzContext.shutdown();
     }
 
     private Map<String, Object> getSourceSettings(RiverSettings settings){

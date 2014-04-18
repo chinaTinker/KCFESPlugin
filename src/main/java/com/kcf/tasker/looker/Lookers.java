@@ -26,11 +26,11 @@ public class Lookers {
      *  the correct Looker instance
      *  null, if the table is not in the config
      */
-    public static Looker getLooker(String table, long delay, Client client) {
+    public static Looker getLooker(String table, Client client) {
         Tables theTable = Tables.valueOf(table);
         if(theTable != null){
             switch (theTable){
-                case Discuss: return getDiscussLooker(delay, client);
+                case Discuss: return getDiscussLooker(client);
                 default: return null;
             }
         }
@@ -38,9 +38,22 @@ public class Lookers {
         return null;
     }
 
-    public static DiscussLooker getDiscussLooker(long delay, Client client){
+    public static Class<? extends Looker> getLookerClazz(String name) {
+        Tables theTable = Tables.valueOf(name);
+        if(theTable != null){
+            switch (theTable){
+                case Discuss: return DiscussLooker.class;
+                default: return null;
+            }
+        }
 
-        return new DiscussLooker(delay, client);
+        return null;
+
+    }
+
+    public static DiscussLooker getDiscussLooker(Client client){
+
+        return new DiscussLooker(client);
     }
 
 }

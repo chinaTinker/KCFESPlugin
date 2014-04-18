@@ -85,7 +85,7 @@ public class TestRepo {
 
         assert user != null;
         assert user.getId() == 1l;
-        assert user.getName().equals("Martin");
+        assert user.getName().equals("马丁医生");
         assert user.getAge() == 2014 - 1975;
         assert user.getGender().equals("男");
     }

@@ -35,7 +35,7 @@ public class TestDiscussLooker {
     public void testDataQuery(){
         System.out.println("test discuss looker data query");
 
-        Looker looker  = Lookers.getDiscussLooker(1000, null);
+        Looker looker  = Lookers.getDiscussLooker(null);
 
         try {
             Method method = Looker.class.getDeclaredMethod("lookData", null);
